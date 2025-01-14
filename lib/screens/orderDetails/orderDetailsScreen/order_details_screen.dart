@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class OrderDetailsScreen extends StatefulWidget {
   const OrderDetailsScreen({Key? key}) : super(key: key);
@@ -10,6 +12,31 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool _isExpanded = false;
+  final ImagePicker _picker = ImagePicker();
+  List<File> _images = [];
+
+  Future<void> _pickImage() async {
+    // فتح الكاميرا لالتقاط صورة
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        if (_images.length < 12) {
+          _images.add(File(pickedFile.path)); // إضافة الصورة إلى القائمة
+        } else {
+          // هنا يمكن إضافة منطق لإظهار رسالة للمستخدم بأن الحد الأقصى هو 12 صورة
+          Get.snackbar("Limit reached", "You can only add up to 12 images.");
+        }
+      });
+    }
+  }
+
+  // Method to remove an image
+  void _removeImage(int index) {
+    setState(() {
+      _images.removeAt(index); // Remove image at the specified index
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,22 +90,69 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     ),
                     // تظهر أيقونة الكاميرا في المنتصف فقط عند التوسيع
                     if (_isExpanded)
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            print("تحديد صورة");
-                          },
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 40,
+                      Column(
+                        children: [
+                          // Show the camera icon to pick images
+                          Center(
+                            child: GestureDetector(
+                              onTap: _pickImage, // افتح الكاميرا عند الضغط على الأيقونة
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 40,
+                              ),
                             ),
-                            onPressed: () {
-                              print("فتح الكاميرا");
-                            },
                           ),
-                        ),
+                          // Show the selected images in the black list (expanded area)
+                          if (_images.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                width: Get.width * 0.9,
+                                height: 150, // Height adjusted for images
+                                child: GridView.builder(
+                                  itemCount: _images.length,
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    return Stack(
+                                      children: [
+                                        // Image displayed
+                                        Image.file(
+                                          _images[index],
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                        ),
+                                        // Red circular 'X' icon to delete the image
+                                        Positioned(
+                                          top: 5,
+                                          right: 5,
+                                          child: GestureDetector(
+                                            onTap: () => _removeImage(index), // Remove image on tap
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                   ],
                 ),

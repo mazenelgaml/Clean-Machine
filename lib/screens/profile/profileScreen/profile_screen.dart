@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../cutom_widgets/cutom_nav_bar.dart';
+import '../profileController/profile_controller.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return GetBuilder<ProfileController>(
+        init: ProfileController(),
+    builder: (ProfileController controller) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        leading: null,
+        title: Text(
+          "C Machine",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              controller.showLanguageBottomSheet(context);
+            },
+            icon: Icon(
+              Icons.language_outlined,
+              size: 25,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.only(bottom: 80),
         child: Column(
@@ -253,6 +284,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+      bottomNavigationBar: CustomNavBar(currentTabIndex: 2,),
+    );});
   }
 }

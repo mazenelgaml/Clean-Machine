@@ -1,5 +1,7 @@
+import 'package:clean_machine/screens/profile/profileScreen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../cutom_widgets/cutom_nav_bar.dart';
 import 'controller/home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -64,42 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller.buildTabContent("Review"),
               ],
             ),
-              bottomNavigationBar: Container(
-                margin: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: Colors.black, // Slightly transparent black background
-                ),
-                child: ClipRRect(
-
-                  borderRadius: BorderRadius.circular(25),
-                  child: BottomNavigationBar(
-
-                    currentIndex: _currentTabIndex, // Replace with your current index variable
-                    onTap: (index) {
-                      setState(() {
-                        _currentTabIndex = index;
-                        if(index==2){
-                          Get.to(()=>HomeScreen());
-                        }// Update the current index on tap
-                      });
-                    },
-                    items: const [
-                      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-                      BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
-                      BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-                    ],
-                    backgroundColor: Colors.transparent, // Transparent background for the bar itself
-                    selectedItemColor: Colors.white,
-                    unselectedItemColor: Colors.grey,
-
-                  ),
-                ),
-              )
+              bottomNavigationBar: CustomNavBar(currentTabIndex: 0,)
 
 
 
-              ,floatingActionButton: FloatingActionButton(
+            ,floatingActionButton: FloatingActionButton(
               onPressed: () {
                 setState(() {
 
