@@ -1,4 +1,4 @@
-import 'package:clean_machine/screens/Login/login_screen.dart';
+import 'package:clean_machine/screens/Login/login_screen/login_screen.dart';
 import 'package:clean_machine/screens/home/home_screen.dart';
 import 'package:clean_machine/services/app_translation.dart';
 import 'package:clean_machine/services/memory.dart';
