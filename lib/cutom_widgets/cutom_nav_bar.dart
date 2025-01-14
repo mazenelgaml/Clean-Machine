@@ -2,6 +2,7 @@ import 'package:clean_machine/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../screens/history/history_screen/history_screen.dart';
 import '../screens/profile/profileScreen/profile_screen.dart';
 
 class CustomNavBar extends StatefulWidget {
@@ -33,9 +34,12 @@ class _CustomNavBarState extends State<CustomNavBar> {
               widget.currentTabIndex = index;
               if(index==2){
                 Get.off(()=>ProfileScreen());
-              }if(index==0)
+              }else if(index==0)
               {
                 Get.off(()=>HomeScreen());
+              }
+              else{
+                Get.to(()=>HistoryScreen());
               }// Update the current index on tap
             });
           },
