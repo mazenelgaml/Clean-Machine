@@ -1,4 +1,4 @@
-import 'package:clean_machine/screens/home/home_screen.dart';
+import 'package:clean_machine/screens/home/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

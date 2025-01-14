@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-import '../../home/home_screen.dart';
+import '../../home/home_screen/home_screen.dart';
  // استيراد صفحة HomeScreen
 
 class LoginController extends GetxController {

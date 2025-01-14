@@ -1,8 +1,8 @@
 import 'package:clean_machine/screens/profile/profileScreen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../cutom_widgets/cutom_nav_bar.dart';
-import 'controller/home_controller.dart';
+import '../../../cutom_widgets/cutom_nav_bar.dart';
+import '../controller/home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
