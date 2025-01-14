@@ -34,7 +34,9 @@ class LoginController extends GetxController {
         // الانتقال إلى الصفحة الرئيسية
         Get.off(() => HomeScreen());
       } else {
-        Get.snackbar('Error', 'Please agree to Remember Me');
+        Get.snackbar('Success', 'Login Successful');
+        // الانتقال إلى الصفحة الرئيسية
+        Get.off(() => HomeScreen());
       }
     }
   }

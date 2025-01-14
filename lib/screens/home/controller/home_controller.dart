@@ -86,7 +86,7 @@ class HomeController extends GetxController {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: (){
-            Get.to(()=>OrderDetailsScreen());
+            Get.to(()=>DynamicExpandableContainer());
           },
           child: Card(
             color: Color(0xffcfd0d4),

@@ -56,11 +56,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.black,
-              leading: null,
+              leading: BackButton(color: Colors.white,onPressed: (){Get.back();},),
               title: Text(
                 "History",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -141,7 +141,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ? "${date.day}/${date.month}/${date.year}"
               : label,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
             color: textColor,
           ),

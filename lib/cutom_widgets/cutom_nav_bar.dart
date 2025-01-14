@@ -39,7 +39,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 Get.off(()=>HomeScreen());
               }
               else{
-                Get.to(()=>HistoryScreen());
+                Get.off(()=>HistoryScreen());
               }// Update the current index on tap
             });
           },
