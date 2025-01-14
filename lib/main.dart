@@ -1,3 +1,4 @@
+import 'package:clean_machine/screens/Login/login_screen.dart';
 import 'package:clean_machine/screens/home/home_screen.dart';
 import 'package:clean_machine/services/app_translation.dart';
 import 'package:clean_machine/services/memory.dart';
@@ -23,9 +24,9 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return GetMaterialApp(
-      title: 'Yomy Merchant',
+      title: 'Clean Machine',
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      home: LoginScreen(),
       translations: AppTranslations(),
       locale: Get.find<LocalizationService>().activeLocale,
       supportedLocales: SupportedLocales.all,
