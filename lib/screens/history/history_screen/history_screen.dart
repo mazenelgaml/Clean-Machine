@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 import '../../../cutom_widgets/cutom_nav_bar.dart';
 import '../history_controller/history_controller.dart';
@@ -13,171 +12,141 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  DateTime _selectedDate = DateTime.now();
-  DateTime _todayDate = DateTime.now();
+  DateTime? _toDate;
+  DateTime? _fromDate;
+
+  void _selectDate(BuildContext context, {required bool isToDate}) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: Colors.teal,
+              onPrimary: Colors.white,
+              surface: Colors.grey[850]!,
+              onSurface: Colors.white,
+            ),
+            dialogBackgroundColor: Colors.black,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        if (isToDate) {
+          _toDate = pickedDate;
+        } else {
+          _fromDate = pickedDate;
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HistoryController>(
         init: HistoryController(),
-    builder: (HistoryController controller) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: null,
-        title: Text(
-          "C Machine",
+        builder: (HistoryController controller) {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.black,
+              leading: null,
+              title: Text(
+                "History",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    controller.showLanguageBottomSheet(context);
+                  },
+                  icon: Icon(
+                    Icons.language_outlined,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            bottomNavigationBar: CustomNavBar(
+              currentTabIndex: 1,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _selectDate(context, isToDate: true),
+                          child: _buildDateContainer(
+                            _toDate,
+                            "To Date",
+                            Colors.black,
+                            Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _selectDate(context, isToDate: false),
+                          child: _buildDateContainer(
+                            _fromDate,
+                            "From Date",
+                            Colors.black,
+                            Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _buildDateContainer(
+      DateTime? date, String label, Color bgColor, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          date != null
+              ? "${date.day}/${date.month}/${date.year}"
+              : label,
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: textColor,
           ),
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              controller.showLanguageBottomSheet(context);
-            },
-            icon: Icon(
-              Icons.language_outlined,
-              size: 25,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
-      bottomNavigationBar: CustomNavBar(currentTabIndex: 1,),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              const SizedBox(height: 10),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.blue),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Today's Date",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "${_todayDate.day}/${_todayDate.month}/${_todayDate.year}",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.red),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Selected Date",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TableCalendar(
-              focusedDay: _todayDate,
-              firstDay: DateTime(2000),
-              lastDay: DateTime(2100),
-              calendarStyle: CalendarStyle(
-                selectedDecoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                todayDecoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false, // إخفاء زر تغيير العرض
-                titleCentered: true, // جعل العنوان في المنتصف
-                decoration: BoxDecoration(
-                  color: Colors.grey[900], // لون الخلفية أفتح من الأسود
-                ),
-                titleTextStyle: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // لون النص أبيض
-                ),
-                leftChevronIcon: Icon(
-                  Icons.chevron_left,
-                  color: Colors.white, // لون السهم الأبيض
-                ),
-                rightChevronIcon: Icon(
-                  Icons.chevron_right,
-                  color: Colors.white, // لون السهم الأبيض
-                ),
-              ),
-              selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDate = selectedDay;
-                });
-              },
-            )
-
-
-          ),
-          SizedBox(height: 14,),
-          GestureDetector(
-            child: Container(
-              width: Get.width * 0.9,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white),
-              ),
-              child: Center(
-                child: Text(
-                  "Go To My History",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-    );});
+    );
   }
 }
