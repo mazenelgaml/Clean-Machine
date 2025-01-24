@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Clean Machine',
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: HomeScreen(),
       translations: AppTranslations(),
       locale: Get.find<LocalizationService>().activeLocale,
       supportedLocales: SupportedLocales.all,

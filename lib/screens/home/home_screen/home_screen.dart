@@ -1,4 +1,5 @@
 import 'package:clean_machine/screens/profile/profileScreen/profile_screen.dart';
+import 'package:clean_machine/services/translation_key.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../cutom_widgets/cutom_nav_bar.dart';
@@ -51,19 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text: "Plan"),
-                  Tab(text: "Reject"),
-                  Tab(text: "Waiting"),
-                  Tab(text: "Review"),
+                  Tab(text:plan.tr),
+                  Tab(text: reject.tr),
+                  Tab(text: waiting.tr),
+                  Tab(text: review.tr),
                 ],
               ),
             ),
             body: TabBarView(
               children: [
-                controller.buildTabContent("Plan"),
-                controller.buildTabContent("Reject"),
-                controller.buildTabContent("Waiting"),
-                controller.buildTabContent("Review"),
+                controller.buildTabContent(plan.tr),
+                controller.buildTabContent(reject.tr),
+                controller.buildTabContent(waiting.tr),
+                controller.buildTabContent( review.tr),
               ],
             ),
               bottomNavigationBar: CustomNavBar(currentTabIndex: 0,)
@@ -73,6 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ,floatingActionButton: FloatingActionButton(
               onPressed: () {
                 setState(() {
+                  controller.isLoading=true;
+                  controller.getUserPlan();
+                  controller.getUserReject();
+                  controller.getUserWaiting();
 
                 });
               },

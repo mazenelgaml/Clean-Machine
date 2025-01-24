@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../services/translation_key.dart';
+
 class DynamicExpandableContainer extends StatefulWidget {
 
   @override
@@ -156,7 +158,7 @@ class _DynamicExpandableContainerState
         backgroundColor: Colors.black,
         leading: BackButton(color: Colors.white,onPressed: (){Get.back();},),
         title: Text(
-          "Order Details",
+          orderDetails.tr,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -221,7 +223,7 @@ class _DynamicExpandableContainerState
               ),
             ),
             _buildExpandableSection(
-              title: "Before Clean",
+              title: beforeClean.tr,
               isExpanded: isBeforeCleanExpanded,
               onToggle: () {
                 setState(() {
@@ -233,7 +235,7 @@ class _DynamicExpandableContainerState
               onRemoveImage: (index) => _removeImage(beforeCleanImages, index),
             ),
             _buildExpandableSection(
-              title: "After Clean",
+              title: afterClean.tr,
               isExpanded: isAfterCleanExpanded,
               onToggle: () {
                 setState(() {
@@ -265,7 +267,7 @@ class _DynamicExpandableContainerState
                     fontWeight: FontWeight.bold,),
                   decoration: InputDecoration(
 
-                    hintText: 'Location',
+                    hintText: location.tr,
                     hintStyle: TextStyle(
                       color: Colors.blueAccent,
                       fontWeight: FontWeight.bold,
@@ -287,7 +289,7 @@ class _DynamicExpandableContainerState
                 width: Get.width * 0.95,
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: 'Comment Damaged',
+                    hintText: damageComment.tr,
                     hintStyle: TextStyle(color: Colors.grey[700]),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black, width: 2.5),
@@ -307,7 +309,7 @@ class _DynamicExpandableContainerState
                 width: Get.width * 0.95,
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: 'Comment Visited',
+                    hintText:visitedComment.tr,
                     hintStyle: TextStyle(color: Colors.grey[700]),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black, width: 2.5),
@@ -335,7 +337,7 @@ class _DynamicExpandableContainerState
                     borderRadius: BorderRadius.circular(25)
                   )
                 ),
-                child: Text('Send',style: TextStyle(
+                child: Text(send.tr,style: TextStyle(
                   color: Colors.white,fontWeight: FontWeight.w800,
                   fontSize: 18
                 ),),

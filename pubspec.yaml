@@ -53,9 +53,12 @@ dependencies:
   intl: ^0.19.0
   geolocator: ^13.0.2
   geocoding: ^3.0.0
+  jwt_decoder: ^2.0.1
   easy_localization: ^3.0.7
   sweet_nav_bar:
   table_calendar: ^3.0.6
+  cool_alert: ^2.0.1
+  flare_flutter: ^3.0.2
 
 dev_dependencies:
   flutter_test:

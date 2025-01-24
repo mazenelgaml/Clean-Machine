@@ -20,6 +20,7 @@ class CacheHelper extends GetxService {
   //! Logout by clearing specific data
   void loggingOut() {
     sharedPreferences.remove("token");
+    sharedPreferences.remove("id");
   }
 
   //! Save data to SharedPreferences

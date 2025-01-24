@@ -1,3 +1,4 @@
+import 'package:clean_machine/services/translation_key.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,8 +10,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LoginController controller = Get.put(LoginController());
-
-    // دالة لتبديل حالة إظهار/إخفاء كلمة المرور
     void togglePasswordVisibility() {
       controller.obscureText.value = !controller.obscureText.value;
     }
@@ -27,7 +26,7 @@ class LoginScreen extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Hi There!  ',
+                    hiThere.tr,
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -43,7 +42,7 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               Text(
-                'Welcome back, Sign in to your account',
+                welcomeBack.tr+signInToYourAccount.tr,
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
@@ -55,9 +54,11 @@ class LoginScreen extends StatelessWidget {
                 child: Container(
                   width: Get.width * 0.9,
                   child: TextFormField(
+
+                    controller: controller.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'Email',
+                      hintText: email.tr,
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: Colors.white,
@@ -76,10 +77,11 @@ class LoginScreen extends StatelessWidget {
                 child: Container(
                   width: Get.width * 0.9,
                   child: Obx(() => TextFormField(
+                    controller: controller.passwordController,
                     obscureText: controller.obscureText.value,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                      hintText: 'Password',
+                      hintText: password.tr,
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: Colors.white,
@@ -110,7 +112,7 @@ class LoginScreen extends StatelessWidget {
                     onChanged: controller.toggleRememberMe,
                   )),
                   Text(
-                    'Remember Me',
+                    rememberMe.tr,
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -121,7 +123,7 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               GestureDetector(
-                onTap: controller.onLoginPressed,
+                onTap:(){ controller.onLoginPressed(context);},
                 child: Container(
                   width: Get.width * 0.9,
                   height: 48,
@@ -132,7 +134,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Login',
+                      logIn.tr,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,

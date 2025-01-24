@@ -1,4 +1,5 @@
 import 'package:clean_machine/screens/home/home_screen/home_screen.dart';
+import 'package:clean_machine/services/translation_key.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -43,10 +44,10 @@ class _CustomNavBarState extends State<CustomNavBar> {
               }// Update the current index on tap
             });
           },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          items:  [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: home.tr),
+            BottomNavigationBarItem(icon: Icon(Icons.history), label:history.tr ),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: profile.tr),
           ],
           backgroundColor: Colors.transparent, // Transparent background for the bar itself
           selectedItemColor: Colors.white,

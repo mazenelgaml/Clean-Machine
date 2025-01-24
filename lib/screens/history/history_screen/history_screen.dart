@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../cutom_widgets/cutom_nav_bar.dart';
+import '../../../services/translation_key.dart';
 import '../history_controller/history_controller.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -58,7 +59,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               backgroundColor: Colors.black,
               leading: BackButton(color: Colors.white,onPressed: (){Get.back();},),
               title: Text(
-                "History",
+                "C Machine",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -93,7 +94,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           onTap: () => _selectDate(context, isToDate: true),
                           child: _buildDateContainer(
                             _toDate,
-                            "To Date",
+                            toDate.tr,
                             Colors.black,
                             Colors.white,
                           ),
@@ -105,7 +106,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           onTap: () => _selectDate(context, isToDate: false),
                           child: _buildDateContainer(
                             _fromDate,
-                            "From Date",
+                            fromDate.tr,
                             Colors.black,
                             Colors.white,
                           ),

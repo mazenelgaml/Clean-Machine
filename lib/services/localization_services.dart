@@ -1,39 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'memory.dart';
 
-
-
 class SupportedLocales {
-  static List<Locale> all = [const Locale("en"), const Locale("ar")];
+  static final List<Locale> all = [const Locale("en"), const Locale("ar")];
 
-  static Locale english = const Locale("en");
-  static Locale arabic = const Locale("ar");
+  static const Locale english = Locale("en");
+  static const Locale arabic = Locale("ar");
 }
 
 class LocalizationService extends GetxService {
   LocalizationService(this._activeLocale);
 
-  final Locale _activeLocale;
+  final Rx<Locale> _activeLocale;
 
-  Locale get activeLocale => _activeLocale;
+  Locale get activeLocale => _activeLocale.value;
+
+  set activeLocale(Locale locale) {
+    _activeLocale.value = locale;
+    Get.find<CacheHelper>().activeLocale = locale; // تحديث التخزين
+    Get.updateLocale(locale); // تحديث اللغة في GetX
+  }
 
   static LocalizationService init() {
-    //Get active local from storage
-    Locale activeLocale = Get.find<CacheHelper>().activeLocale;
-    return LocalizationService(activeLocale);
+    // جلب اللغة النشطة من التخزين أو التعيين إلى الإنجليزية كافتراضية
+    Locale activeLocale = Get.find<CacheHelper>().activeLocale ?? SupportedLocales.english;
+    return LocalizationService(activeLocale.obs);
   }
 
   void toggleLocale() {
-    final Locale newLocale =
-    Get.find<CacheHelper>().activeLocale == SupportedLocales.arabic
+    activeLocale = activeLocale == SupportedLocales.arabic
         ? SupportedLocales.english
         : SupportedLocales.arabic;
-    //in storage
-    Get.find<CacheHelper>().activeLocale = newLocale;
-
-    //in Getx
-    Get.updateLocale(newLocale);
   }
 }

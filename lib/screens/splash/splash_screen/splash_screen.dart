@@ -1,6 +1,9 @@
 import 'package:clean_machine/screens/Login/login_screen/login_screen.dart';
+import 'package:clean_machine/screens/home/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../services/memory.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Navigate to the next screen after the animation
     Future.delayed(Duration(seconds: 1), () {
-      Get.off(() => LoginScreen()); // Replace with your main screen
+      Get.find<CacheHelper>().checkUserIsSignedIn?Get.off(()=>HomeScreen()):Get.off(() => LoginScreen()); // Replace with your main screen
     });
   }
 
