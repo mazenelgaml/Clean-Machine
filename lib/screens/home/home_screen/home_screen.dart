@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
       init: HomeController(),
       builder: (HomeController controller) {
         return DefaultTabController(
-          length: 4, // Number of tabs
+          length: 3, // Number of tabs
           child: Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Tab(text:plan.tr),
                   Tab(text: reject.tr),
                   Tab(text: waiting.tr),
-                  Tab(text: review.tr),
+
                 ],
               ),
             ),
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller.buildTabContent(plan.tr),
                 controller.buildTabContent(reject.tr),
                 controller.buildTabContent(waiting.tr),
-                controller.buildTabContent( review.tr),
+
               ],
             ),
               bottomNavigationBar: CustomNavBar(currentTabIndex: 0,)

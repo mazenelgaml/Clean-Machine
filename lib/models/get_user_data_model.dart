@@ -9,99 +9,17 @@ GetUserDataModel getUserDataModelFromJson(String str) => GetUserDataModel.fromJs
 String getUserDataModelToJson(GetUserDataModel data) => json.encode(data.toJson());
 
 class GetUserDataModel {
-  UserData userData;
-  UsrStatistic usrStatistic;
-
-  GetUserDataModel({
-    required this.userData,
-    required this.usrStatistic,
-  });
-
-  factory GetUserDataModel.fromJson(Map<String, dynamic> json) => GetUserDataModel(
-    userData: UserData.fromJson(json["userData"]),
-    usrStatistic: UsrStatistic.fromJson(json["usrStatistic"]),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "userData": userData.toJson(),
-    "usrStatistic": usrStatistic.toJson(),
-  };
-}
-
-class UserData {
-  int id;
-  String userBarCode;
-  String companyDataId;
+  String userId;
   String userName;
-  int cityCodeId;
-  String userAddress;
-  String userNationalId;
-  String userWhatsapp;
   String email;
-  String phoneNumber;
-  DateTime dateStart;
-  DateTime dateFinsh;
-  String description;
-  String imageUrl;
-  String createUserId;
-
-  UserData({
-    required this.id,
-    required this.userBarCode,
-    required this.companyDataId,
-    required this.userName,
-    required this.cityCodeId,
-    required this.userAddress,
-    required this.userNationalId,
-    required this.userWhatsapp,
-    required this.email,
-    required this.phoneNumber,
-    required this.dateStart,
-    required this.dateFinsh,
-    required this.description,
-    required this.imageUrl,
-    required this.createUserId,
-  });
-
-  factory UserData.fromJson(Map<String, dynamic> json) => UserData(
-    id: json["id"],
-    userBarCode: json["userBarCode"],
-    companyDataId: json["companyDataId"],
-    userName: json["userName"],
-    cityCodeId: json["cityCodeId"],
-    userAddress: json["userAddress"],
-    userNationalId: json["userNationalId"],
-    userWhatsapp: json["userWhatsapp"],
-    email: json["email"],
-    phoneNumber: json["phoneNumber"],
-    dateStart: DateTime.parse(json["dateStart"]),
-    dateFinsh: DateTime.parse(json["dateFinsh"]),
-    description: json["description"],
-    imageUrl: json["imageUrl"],
-    createUserId: json["createUserId"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "userBarCode": userBarCode,
-    "companyDataId": companyDataId,
-    "userName": userName,
-    "cityCodeId": cityCodeId,
-    "userAddress": userAddress,
-    "userNationalId": userNationalId,
-    "userWhatsapp": userWhatsapp,
-    "email": email,
-    "phoneNumber": phoneNumber,
-    "dateStart": dateStart.toIso8601String(),
-    "dateFinsh": dateFinsh.toIso8601String(),
-    "description": description,
-    "imageUrl": imageUrl,
-    "createUserId": createUserId,
-  };
-}
-
-class UsrStatistic {
-  int userId;
+  List<String> roles;
+  String delegateNameL1;
+  dynamic delegateNameL2;
+  dynamic delegateMobil;
+  DateTime startDate;
+  DateTime endDate;
+  dynamic delegateAddress;
+  dynamic cityName;
   int numberOfNewOrders;
   int numberOfWaitingOrders;
   int numberOfAcceptOrders;
@@ -109,8 +27,18 @@ class UsrStatistic {
   int numberOfOrdersAcceptForOwner;
   int numberOfOrdersRejectForAdmin;
 
-  UsrStatistic({
+  GetUserDataModel({
     required this.userId,
+    required this.userName,
+    required this.email,
+    required this.roles,
+    required this.delegateNameL1,
+    required this.delegateNameL2,
+    required this.delegateMobil,
+    required this.startDate,
+    required this.endDate,
+    required this.delegateAddress,
+    required this.cityName,
     required this.numberOfNewOrders,
     required this.numberOfWaitingOrders,
     required this.numberOfAcceptOrders,
@@ -119,8 +47,18 @@ class UsrStatistic {
     required this.numberOfOrdersRejectForAdmin,
   });
 
-  factory UsrStatistic.fromJson(Map<String, dynamic> json) => UsrStatistic(
+  factory GetUserDataModel.fromJson(Map<String, dynamic> json) => GetUserDataModel(
     userId: json["userId"],
+    userName: json["userName"],
+    email: json["email"],
+    roles: List<String>.from(json["roles"].map((x) => x)),
+    delegateNameL1: json["delegateNameL1"],
+    delegateNameL2: json["delegateNameL2"],
+    delegateMobil: json["delegateMobil"],
+    startDate: DateTime.parse(json["startDate"]),
+    endDate: DateTime.parse(json["endDate"]),
+    delegateAddress: json["delegateAddress"],
+    cityName: json["cityName"],
     numberOfNewOrders: json["numberOfNewOrders"],
     numberOfWaitingOrders: json["numberOfWaitingOrders"],
     numberOfAcceptOrders: json["numberOfAcceptOrders"],
@@ -131,6 +69,16 @@ class UsrStatistic {
 
   Map<String, dynamic> toJson() => {
     "userId": userId,
+    "userName": userName,
+    "email": email,
+    "roles": List<dynamic>.from(roles.map((x) => x)),
+    "delegateNameL1": delegateNameL1,
+    "delegateNameL2": delegateNameL2,
+    "delegateMobil": delegateMobil,
+    "startDate": startDate.toIso8601String(),
+    "endDate": endDate.toIso8601String(),
+    "delegateAddress": delegateAddress,
+    "cityName": cityName,
     "numberOfNewOrders": numberOfNewOrders,
     "numberOfWaitingOrders": numberOfWaitingOrders,
     "numberOfAcceptOrders": numberOfAcceptOrders,

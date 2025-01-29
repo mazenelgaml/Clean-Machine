@@ -1,5 +1,5 @@
 class EndPoint {
-  static String baseUrl="https://waleed81-001-site3.jtempurl.com";
+  static String baseUrl="http://195.201.110.116";
 }
 
 class ApiKey {

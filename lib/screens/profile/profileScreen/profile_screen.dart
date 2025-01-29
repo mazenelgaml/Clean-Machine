@@ -64,7 +64,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text("${controller.usrStatistic?.numberOfAcceptOrders??"0"}",style: TextStyle(
+                          Text("${controller.userData?.numberOfAcceptOrders??"0"}",style: TextStyle(
                               fontWeight: FontWeight.w800
                           ),),
                           Text(accept.tr,style: TextStyle(
@@ -89,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text("${controller.usrStatistic?.numberOfWaitingOrders??"0"}",style: TextStyle(
+                          Text("${controller.userData?.numberOfWaitingOrders??"0"}",style: TextStyle(
                               fontWeight: FontWeight.w800
                           ),),
                           Text(onReview.tr,style: TextStyle(
@@ -114,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text("${controller.usrStatistic?.numberOfRejectOrders??"0"}",style: TextStyle(
+                          Text("${controller.userData?.numberOfRejectOrders??"0"}",style: TextStyle(
                             fontWeight: FontWeight.w800
                           ),),
                           Text(refused.tr,style: TextStyle(
@@ -190,7 +190,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                            controller.userData?.phoneNumber??"",
+                            controller.userData?.delegateMobil??"",
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 16,
@@ -214,8 +214,8 @@ class ProfileScreen extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          controller.userData?.dateStart != null
-                              ? DateFormat('yyyy-MM-dd').format(controller.userData!.dateStart)
+                          controller.userData?.startDate != null
+                              ? DateFormat('yyyy-MM-dd').format(controller.userData!.startDate)
                               : "",
                           style: TextStyle(
                             color: Colors.black,
@@ -242,8 +242,8 @@ class ProfileScreen extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                            controller.userData?.dateFinsh != null
-                                ? DateFormat('yyyy-MM-dd').format(controller.userData!.dateFinsh)
+                            controller.userData?.endDate != null
+                                ? DateFormat('yyyy-MM-dd').format(controller.userData!.endDate)
                                 : "",
                             style: TextStyle(
                               color: Colors.black,

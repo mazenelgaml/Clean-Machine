@@ -1,76 +1,66 @@
+import 'package:clean_machine/models/get_token_model.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:jwt_decoder/jwt_decoder.dart'; // Added package for decoding token
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../../services/end_points.dart';
 import '../../../services/memory.dart';
 import '../../home/home_screen/home_screen.dart';
 
 class LoginController extends GetxController {
-  // Controllers for email and password input
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // Observables for checkbox and password visibility
   RxBool isChecked = false.obs;
   RxBool obscureText = true.obs;
 
-  // Form validation key
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  // Validation for email
+  bool isLoading = false;
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your email';
+      return 'الرجاء إدخال البريد الإلكتروني';
     }
     if (!value.contains('@')) {
-      return 'Please enter a valid email with "@"';
+      return 'يرجى إدخال بريد إلكتروني صالح يحتوي على "@"';
     }
     return null;
   }
 
-  // Validation for password
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      return 'الرجاء إدخال كلمة المرور';
     }
     return null;
   }
 
-  // Toggle for Remember Me checkbox
   void toggleRememberMe(bool? newValue) {
     isChecked.value = newValue ?? false;
   }
 
-  // Loading state
-  bool isLoading = false;
-
-  // On Login button press
   void onLoginPressed(BuildContext context) async {
     if (formKey.currentState?.validate() ?? false) {
       await logIn(context);
     }
   }
 
-  // Login function
   Future<void> logIn(BuildContext context) async {
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: EndPoint.baseUrl,
-        validateStatus: (status) {
-          return status != null && status < 500;
-        },
+        validateStatus: (status) => status != null && status < 500,
       ),
     );
 
-    isLoading = true; // Start loading
-    update(); // Notify listeners about the change
+    isLoading = true;
+    update();
 
     try {
       final response = await dio.post(
-        "/UserAuthontication/Login",
+        "/api/ApplicationUsers/login",
         data: {
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
@@ -81,79 +71,91 @@ class LoginController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final token = response.data; // Extract the token from the response
-        print(token);
+        final getTokenModel = GetTokenModel.fromJson(response.data);
+        final token = getTokenModel.token;
 
         if (token != null && token.isNotEmpty) {
           try {
-            Map<String, dynamic> decodedToken = JwtDecoder.decode(token); // Decode the token
-            print(decodedToken); // For debugging
-            // Adjust this based on your token structure
-            String? userId = decodedToken['UserId']; // Change 'userId' to the actual key in your token
-            await Get.find<CacheHelper>().saveData(key: "id", value: userId);
+            if (token is! String) {
+              throw Exception("التوكن المستلم ليس نصًا");
+            }
+
+            Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+            print("محتوى التوكن: $decodedToken");  // طباعة الداتا للتحقق
+
+            // استخراج معرف المستخدم من التوكن باستخدام المفتاح الصحيح
+            String? userId = decodedToken['UserId'] ?? decodedToken['sub'];
+               print(userId);
             if (userId != null) {
+              await Get.find<CacheHelper>().saveData(key: "id", value: userId);
               CoolAlert.show(
                 context: context,
                 type: CoolAlertType.success,
-                title: "Login Successful",
-                text: "Welcome to Clean Machine",
+                title: "تم تسجيل الدخول بنجاح",
+                text: "مرحبًا بك في Clean Machine",
               ).then((_) async {
                 if (isChecked.value) {
-                  // Save token if Remember Me is checked
-                  await Get.find<CacheHelper>().saveData(key: "token",value: token,);
+                  await Get.find<CacheHelper>().saveData(key: "token", value: token);
                 }
-                // Navigate to HomeScreen
                 Get.off(() => HomeScreen());
               });
             } else {
               CoolAlert.show(
                 context: context,
                 type: CoolAlertType.error,
-                title: "Error",
-                text: "User ID not found in the token.",
+                title: "خطأ",
+                text: "تعذر العثور على معرف المستخدم في التوكن.",
               );
             }
           } catch (e) {
-            print('Error decoding token: $e');
+            print('خطأ في فك التشفير: $e');
             CoolAlert.show(
               context: context,
               type: CoolAlertType.error,
-              title: "Token Decoding Error",
-              text: "Failed to decode the token.",
+              title: "خطأ في التوكن",
+              text: "تعذر فك تشفير التوكن.",
             );
           }
-        }
-
-        else {
-          // If token is null or empty
+        } else {
           CoolAlert.show(
             context: context,
             type: CoolAlertType.error,
-            title: "Error",
-            text: "Invalid token received.",
+            title: "خطأ",
+            text: "التوكن المستلم غير صالح.",
           );
         }
       } else {
-        // Show error alert for invalid credentials
         CoolAlert.show(
           context: context,
           type: CoolAlertType.error,
-          title: "Error",
-          text: "Invalid username or password.\nPlease try again.",
+          title: "خطأ",
+          text: "البريد الإلكتروني أو كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى.",
         );
       }
     } catch (e) {
-      // Show error alert for connection issues
+      print('خطأ تسجيل الدخول: $e');
       CoolAlert.show(
         context: context,
         type: CoolAlertType.error,
-        title: "Connection Error",
-        text: "Error occurred while connecting to the API",
+        title: "خطأ في الاتصال",
+        text: "حدث خطأ أثناء الاتصال بالخادم.",
       );
     } finally {
-      isLoading = false; // Stop loading
-      update(); // Notify listeners about the change
+      isLoading = false;
+      update();
     }
   }
+}
 
+// نموذج لاستخراج التوكن من الاستجابة
+class GetTokenModel {
+  final String token;
+
+  GetTokenModel({required this.token});
+
+  factory GetTokenModel.fromJson(Map<String, dynamic> json) {
+    return GetTokenModel(
+      token: json['token'] as String,
+    );
+  }
 }
