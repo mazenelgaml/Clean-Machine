@@ -5,18 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../models/get_user_data_model.dart';
+import '../../../services/localization_services.dart';
 import '../../../services/memory.dart';
+import '../../../services/translation_key.dart';
 
 class ProfileController extends GetxController{
   bool isLoading=false;
-  UserData?userData;
-  UsrStatistic?usrStatistic;
+  GetUserDataModel?userData;
+
   @override
   Future<void> onInit() async {
     super.onInit();
     await CacheHelper.init();
     await getUserProfile();
   }
+  final cacheHelper = Get.find<CacheHelper>();
   void showLanguageBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -31,8 +34,12 @@ class ProfileController extends GetxController{
             children: [
               TextButton(
                 onPressed: () {
-                  // Handle Arabic language selection
-                  Navigator.pop(context); // Close the bottom sheet
+                  // تغيير اللغة إلى العربية
+                  final newLocale =  SupportedLocales.arabic;
+                  // Update in storage and GetX
+                  cacheHelper.activeLocale = newLocale;
+                  Get.updateLocale(newLocale);
+                  Navigator.pop(context); // إغلاق الـ bottom sheet
                 },
                 child: Container(
                   width: Get.width * 0.93,
@@ -48,14 +55,19 @@ class ProfileController extends GetxController{
                     ],
                   ),
                   child: Center(
-                    child: Text("ar", style: TextStyle(fontSize: 18, color: Colors.black)),
+                    child: Text(ar.tr,
+                        style: TextStyle(fontSize: 18, color: Colors.black)),
                   ),
                 ),
               ),
               TextButton(
                 onPressed: () {
-                  // Handle English language selection
-                  Navigator.pop(context); // Close the bottom sheet
+                  // تغيير اللغة إلى الإنجليزية
+                  final newLocale =  SupportedLocales.english;
+                  // Update in storage and GetX
+                  cacheHelper.activeLocale = newLocale;
+                  Get.updateLocale(newLocale);
+                  Navigator.pop(context); // إغلاق الـ bottom sheet
                 },
                 child: Container(
                   width: Get.width * 0.93,
@@ -71,7 +83,8 @@ class ProfileController extends GetxController{
                     ],
                   ),
                   child: Center(
-                    child: Text("en", style: TextStyle(fontSize: 18, color: Colors.black)),
+                    child: Text(en.tr,
+                        style: TextStyle(fontSize: 18, color: Colors.black)),
                   ),
                 ),
               ),
@@ -97,7 +110,7 @@ class ProfileController extends GetxController{
 
     try {
       final response = await dio.get(
-        "/UserAuthontication/GetUserById?userID=${id}",
+        "/api/ApplicationUsers/GetUserById/${id}",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -105,8 +118,8 @@ class ProfileController extends GetxController{
 
       if (response.statusCode == 200) {
         GetUserDataModel userDataModel=GetUserDataModel.fromJson(response.data);
-        userData=userDataModel.userData;
-        usrStatistic=userDataModel.usrStatistic;
+        userData=userDataModel;
+
       } else {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
             SnackBar(content: Text('Error fetching user data')));

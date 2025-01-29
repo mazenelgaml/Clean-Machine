@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/get_all_plan_model.dart';
 import '../../../services/end_points.dart';
@@ -150,7 +151,7 @@ class HomeController extends GetxController {
 
         return GestureDetector(
           onTap: () {
-            Get.to(() => DynamicExpandableContainer());
+            Get.to(() => DynamicExpandableContainer(orderNum: plan.orderNumberFooter, serialNum: plan.atmserial??"", atmName:plan.banknameL1, atmLocation:plan.atmlocation??"",footerId:plan.footerId, bankAtmId:plan.bankAtmid,));
           },
           child: Card(
             color: Color(0xffcfd0d4),
@@ -160,27 +161,41 @@ class HomeController extends GetxController {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    orderNum.tr + ":" + "${plan.orderNumberFooter}",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            orderNum.tr + ":" + "${plan.orderNumberFooter}",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Serial num: ${plan.atmserial}",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w800),
+                          ),
+                          SizedBox(height: 8),
+                        ],
+                      ),
+                      Container(
+                        width: 60,
+                        height: 60,
+                        child:Image(image: plan.imageUrl==null||plan.imageUrl==""?AssetImage("assets/images/atm-machine-3d-icon-png.png"):NetworkImage(plan.imageUrl),fit: BoxFit.fill,) ,
+                      )
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Serial num: ${plan.atmserial}",
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w800),
-                  ),
-                  SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        plan.bankname,
+                        plan.banknameL1,
                         style: TextStyle(
                             fontSize: 16,
                             color: Colors.black,
@@ -194,12 +209,31 @@ class HomeController extends GetxController {
                       Icon(Icons.location_on, size: 16, color: Colors.black),
                       SizedBox(width: 4),
                       Expanded(
-                        child: Text(
-                          plan.atmAdress,
-                          style: TextStyle(
-                              color: Colors.black,
+                        child: GestureDetector(
+                          onTap: () async {
+                            String atmLocation = plan.atmlocation ?? "";
+
+                            if (atmLocation.isNotEmpty) {
+                              String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$atmLocation";
+
+                              if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+                                await launchUrl(Uri.parse(googleMapsUrl), mode: LaunchMode.externalApplication);
+                              } else {
+                                print("Could not launch Google Maps");
+                              }
+                            } else {
+                              print("ATM location is empty");
+                            }
+                          },
+                          child: Text(
+                            plan.atmlocation ?? "",
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue,
                               fontSize: 16,
-                              fontWeight: FontWeight.w800),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -228,7 +262,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/DataAtm/WorkPlanFiltered?representativeId=${id}&orderStatusId=1",
+        "/api/Reports/GetAllPlanNew",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -267,7 +301,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/DataAtm/WorkPlanFiltered?representativeId=${id}&orderStatusId=6",
+        "/api/Reports/GetAllPlanRejected",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -306,7 +340,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/DataAtm/WorkPlanFiltered?representativeId=${id}&orderStatusId=2",
+        "/api/Reports/GetAllPlanWaiting",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),

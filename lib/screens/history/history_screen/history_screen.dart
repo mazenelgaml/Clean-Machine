@@ -1,8 +1,10 @@
+import 'package:clean_machine/models/get_all_plan_history.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../cutom_widgets/cutom_nav_bar.dart';
 import '../../../services/translation_key.dart';
+import '../../orderDetails/orderDetailsScreen/order_details_screen.dart';
 import '../history_controller/history_controller.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -16,48 +18,54 @@ class _HistoryScreenState extends State<HistoryScreen> {
   DateTime? _toDate;
   DateTime? _fromDate;
 
-  void _selectDate(BuildContext context, {required bool isToDate}) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: Colors.teal,
-              onPrimary: Colors.white,
-              surface: Colors.grey[850]!,
-              onSurface: Colors.white,
-            ),
-            dialogBackgroundColor: Colors.black,
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        if (isToDate) {
-          _toDate = pickedDate;
-        } else {
-          _fromDate = pickedDate;
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HistoryController>(
         init: HistoryController(),
         builder: (HistoryController controller) {
+          void _selectDate(BuildContext context, {required bool isToDate}) async {
+            final DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              builder: (BuildContext context, Widget? child) {
+                return Theme(
+                  data: ThemeData.dark().copyWith(
+                    colorScheme: ColorScheme.dark(
+                      primary: Colors.teal,
+                      onPrimary: Colors.white,
+                      surface: Colors.grey[850]!,
+                      onSurface: Colors.white,
+                    ),
+                    dialogBackgroundColor: Colors.black,
+                  ),
+                  child: child!,
+                );
+              },
+            );
+
+            if (pickedDate != null) {
+              setState(() {
+                if (isToDate) {
+                  _toDate = pickedDate;
+                } else {
+                  _fromDate = pickedDate;
+                }
+              });
+
+              // إذا كان التاريخين موجودين، نقوم باستدعاء الدالة مرة واحدة
+              if (_fromDate != null && _toDate != null) {
+                controller.getUserPlanHistory(_toDate!, _fromDate!);
+              }
+            }
+          }
+
+
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.black,
-              leading: BackButton(color: Colors.white,onPressed: (){Get.back();},),
+              leading: BackButton(color: Colors.white, onPressed: () { Get.back(); }),
               title: Text(
                 "C Machine",
                 style: TextStyle(
@@ -103,7 +111,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => _selectDate(context, isToDate: false),
+                          onTap: (){_selectDate(context, isToDate: false);},
                           child: _buildDateContainer(
                             _fromDate,
                             fromDate.tr,
@@ -114,6 +122,81 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20), // Spacing between date pickers and displayed date
+          controller.isLoading?Center(child: CircularProgressIndicator(),):controller.allPlan == null || controller.allPlan.isEmpty?Container(height: Get.height*0.6,child: Center(child: Text(noDataAvailable.tr,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),)):Container(
+            height: Get.height*0.5,
+            width: Get.width*0.9,
+            child: ListView.builder(
+            padding: EdgeInsets.all(8.0),
+            itemCount: controller.allPlan?.length??0, // Use the length of the selected list
+            itemBuilder: (context, index) {
+            // Access the specific item in the selected list
+            GetAllPlanHistoryModel plan =  controller.allPlan![index];
+
+            return GestureDetector(
+            onTap: () {
+            Get.to(() => DynamicExpandableContainer(orderNum: plan.orderNumberFooter, serialNum: plan.atmserial, atmName:plan.banknameL1, atmLocation:plan.atmlocation==null?"":plan.atmlocation, footerId:plan.footerId,bankAtmId:plan.bankAtmid,));
+            },
+            child: Card(
+            color: Color(0xffcfd0d4),
+            margin: EdgeInsets.symmetric(vertical: 8.0),
+            child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Text(
+            orderNum.tr + ":" + "${plan.orderNumberFooter}",
+            style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black),
+            ),
+            SizedBox(height: 8),
+            Text(
+            "Serial num: ${plan.atmserial}",
+            style: TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+            fontWeight: FontWeight.w800),
+            ),
+            SizedBox(height: 8),
+            Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+            Text(
+            plan.banknameL1,
+            style: TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+            fontWeight: FontWeight.w800),
+            ),
+            ],
+            ),
+            SizedBox(height: 8),
+            Row(
+            children: [
+            Icon(Icons.location_on, size: 16, color: Colors.black),
+            SizedBox(width: 4),
+            Expanded(
+            child: Text(
+            plan.atmlocation==null?"":plan.atmlocation,
+            style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w800),
+            ),
+            ),
+            ],
+            ),
+            ],
+            ),
+            ),
+            ),
+            );
+            },
+            ),
+          )
                 ],
               ),
             ),
@@ -121,8 +204,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         });
   }
 
-  Widget _buildDateContainer(
-      DateTime? date, String label, Color bgColor, Color textColor) {
+  Widget _buildDateContainer(DateTime? date, String label, Color bgColor, Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
       decoration: BoxDecoration(
@@ -138,9 +220,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       child: Center(
         child: Text(
-          date != null
-              ? "${date.day}/${date.month}/${date.year}"
-              : label,
+          date != null ? "${date.day}/${date.month}/${date.year}" : label,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,

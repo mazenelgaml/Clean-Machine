@@ -1,31 +1,31 @@
 // To parse this JSON data, do
 //
-//     final getAllPlansModel = getAllPlansModelFromJson(jsonString);
+//     final getAllPlanHistoryModel = getAllPlanHistoryModelFromJson(jsonString);
 
 import 'dart:convert';
 
-List<GetAllPlansModel> getAllPlansModelFromJson(String str) => List<GetAllPlansModel>.from(json.decode(str).map((x) => GetAllPlansModel.fromJson(x)));
+GetAllPlanHistoryModel getAllPlanHistoryModelFromJson(String str) => GetAllPlanHistoryModel.fromJson(json.decode(str));
 
-String getAllPlansModelToJson(List<GetAllPlansModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String getAllPlanHistoryModelToJson(GetAllPlanHistoryModel data) => json.encode(data.toJson());
 
-class GetAllPlansModel {
+class GetAllPlanHistoryModel {
   DateTime startDate;
   DateTime endDate;
   int orderNumberFooter;
   int orderStatusId;
   String statusNameL1;
-  String? atmserial;
-  dynamic atmaddress;
-  String? atmlocation;
+  String atmserial;
+  String atmaddress;
+  String atmlocation;
   String aspNetUsersId;
-  dynamic imageUrl;
+  String imageUrl;
   String banknameL1;
   bool isNotActive;
   bool isDeleted;
   String footerId;
   String bankAtmid;
 
-  GetAllPlansModel({
+  GetAllPlanHistoryModel({
     required this.startDate,
     required this.endDate,
     required this.orderNumberFooter,
@@ -43,7 +43,7 @@ class GetAllPlansModel {
     required this.bankAtmid,
   });
 
-  factory GetAllPlansModel.fromJson(Map<String, dynamic> json) => GetAllPlansModel(
+  factory GetAllPlanHistoryModel.fromJson(Map<String, dynamic> json) => GetAllPlanHistoryModel(
     startDate: DateTime.parse(json["startDate"]),
     endDate: DateTime.parse(json["endDate"]),
     orderNumberFooter: json["orderNumberFooter"],

@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'memory.dart';
+import 'package:flutter/services.dart';
 
 class SupportedLocales {
   static final List<Locale> all = [const Locale("en"), const Locale("ar")];
@@ -18,12 +21,12 @@ class LocalizationService extends GetxService {
 
   set activeLocale(Locale locale) {
     _activeLocale.value = locale;
-    Get.find<CacheHelper>().activeLocale = locale; // تحديث التخزين
-    Get.updateLocale(locale); // تحديث اللغة في GetX
+    Get.find<CacheHelper>().activeLocale = locale; // Update storage
+    Get.updateLocale(locale); // Update language in GetX
   }
 
   static LocalizationService init() {
-    // جلب اللغة النشطة من التخزين أو التعيين إلى الإنجليزية كافتراضية
+    // Retrieve active locale from storage or set default to English
     Locale activeLocale = Get.find<CacheHelper>().activeLocale ?? SupportedLocales.english;
     return LocalizationService(activeLocale.obs);
   }
@@ -32,5 +35,12 @@ class LocalizationService extends GetxService {
     activeLocale = activeLocale == SupportedLocales.arabic
         ? SupportedLocales.english
         : SupportedLocales.arabic;
+  }
+
+  // New method to get the device's locale
+  Future<Locale> getDeviceLocale() async {
+    // Fetch the device's locale using the platform method
+    final locale = await window.locales.first;
+    return locale ?? SupportedLocales.english; // Default to English if null
   }
 }
