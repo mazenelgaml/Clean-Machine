@@ -53,8 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 unselectedLabelColor: Colors.grey,
                 tabs: [
                   Tab(text:plan.tr),
-                  Tab(text: reject.tr),
                   Tab(text: waiting.tr),
+                  Tab(text: reject.tr),
+
 
                 ],
               ),
@@ -62,8 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
             body: TabBarView(
               children: [
                 controller.buildTabContent(plan.tr),
-                controller.buildTabContent(reject.tr),
                 controller.buildTabContent(waiting.tr),
+                controller.buildTabContent(reject.tr),
+
 
               ],
             ),

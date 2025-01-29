@@ -14,11 +14,11 @@ class GetAllPlanHistoryModel {
   int orderNumberFooter;
   int orderStatusId;
   String statusNameL1;
-  String atmserial;
-  String atmaddress;
-  String atmlocation;
-  String aspNetUsersId;
-  String imageUrl;
+  dynamic atmserial;
+  dynamic atmaddress;
+  dynamic atmlocation;
+  dynamic aspNetUsersId;
+  dynamic imageUrl;
   String banknameL1;
   bool isNotActive;
   bool isDeleted;
