@@ -17,7 +17,7 @@ class GetAllPlansModel {
   String? atmserial;
   dynamic atmaddress;
   String? atmlocation;
-  String aspNetUsersId;
+  dynamic aspNetUsersId;
   dynamic imageUrl;
   String banknameL1;
   bool isNotActive;

@@ -151,7 +151,10 @@ class HomeController extends GetxController {
 
         return GestureDetector(
           onTap: () {
-            Get.to(() => DynamicExpandableContainer(orderNum: plan.orderNumberFooter, serialNum: plan.atmserial??"", atmName:plan.banknameL1, atmLocation:plan.atmlocation??"",footerId:plan.footerId, bankAtmId:plan.bankAtmid,));
+            if(tabName == waiting.tr){}
+            else{
+              Get.to(() => DynamicExpandableContainer(orderNum: plan.orderNumberFooter, serialNum: plan.atmserial??"", atmName:plan.banknameL1, atmLocation:plan.atmlocation??"",footerId:plan.footerId, bankAtmId:plan.bankAtmid,));
+            }
           },
           child: Card(
             color: Color(0xffcfd0d4),
@@ -262,7 +265,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/api/Reports/GetAllPlanNew",
+        "/api/Reports/GetAllPlanNew?UserId=$id",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -301,7 +304,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/api/Reports/GetAllPlanRejected",
+        "/api/Reports/GetAllPlanRejected?UserId=$id",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -340,7 +343,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/api/Reports/GetAllPlanWaiting",
+        "/api/Reports/GetAllPlanWaiting?UserId=$id",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
