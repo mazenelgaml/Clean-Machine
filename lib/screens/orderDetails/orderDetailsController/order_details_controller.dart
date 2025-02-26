@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:clean_machine/screens/home/controller/home_controller.dart';
 import 'package:clean_machine/services/end_points.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -15,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../../services/memory.dart';
+import '../../home/home_screen/home_screen.dart';
 
 class OrderDetailsController extends GetxController {
   List<File> beforeCleanImages = [];
@@ -221,21 +223,26 @@ class OrderDetailsController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        // Clear the image lists
+        beforeCleanImages.clear();
+        afterCleanImages.clear();
+
+        // Clear the controllers
+        locationController.clear();
+        commentVisitedController.clear();
+        commentDamagedController.clear();
+        await clearSavedData(footerId);
+        Get.delete<OrderDetailsController>();
+
+        Get.to(() => HomeScreen(initialTabIndex: 1));
         CoolAlert.show(
           context: context,
           type: CoolAlertType.success,
           title: "Submitted",
           text: "Order details submitted successfully.",
-          onConfirmBtnTap: (){
-            beforeCleanImages=[];
-            afterCleanImages=[];
-            locationController.clear();
-            commentVisitedController.clear();
-            commentDamagedController.clear();
-          }
+
         );
-        await clearSavedData(footerId);
-        Get.delete<OrderDetailsController>();
+
       } else {
         print("Error: ${response.data}");
       }
@@ -359,7 +366,9 @@ class OrderDetailsController extends GetxController {
         ));
         return;
       }
-
+     print(footerId);
+      print(beforeImages);
+      print(afterImages);
       diio.FormData formData = diio.FormData.fromMap({
         "workPlanFooterId": footerId,
         "CreateUserId": id,
@@ -395,4 +404,5 @@ class OrderDetailsController extends GetxController {
 
     }
   }
+  HomeController controller=HomeController();
 }

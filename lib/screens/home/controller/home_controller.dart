@@ -153,7 +153,20 @@ class HomeController extends GetxController {
           onTap: () {
             if(tabName == waiting.tr){}
             else{
-              Get.to(() => DynamicExpandableContainer(orderNum: plan.orderNumberFooter, serialNum: plan.atmserial??"", atmName:plan.banknameL1, atmLocation:plan.atmlocation??"",footerId:plan.footerId, bankAtmId:plan.bankAtmid,));
+              Get.offUntil(
+                GetPageRoute(
+                  page: () => DynamicExpandableContainer(
+                    orderNum: plan.orderNumberFooter,
+                    serialNum: plan.atmserial ?? "",
+                    atmName: plan.banknameL1,
+                    atmLocation: plan.atmlocation ?? "",
+                    footerId: plan.footerId,
+                    bankAtmId: plan.bankAtmid,
+                  ),
+                ),
+                    (route) => false, // هذا يجعل الصفحة الجديدة هي الوحيدة في الستاك
+              );
+
             }
           },
           child: Card(
@@ -304,7 +317,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/api/Reports/GetAllPlanRejected?UserId=$id",
+        "/api/Reports/GetAllPlanRejected?UserId==$id",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),

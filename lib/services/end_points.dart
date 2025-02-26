@@ -1,5 +1,5 @@
 class EndPoint {
-  static String baseUrl="http://195.201.110.116";
+  static String baseUrl="http://95.216.63.80";
 }
 
 class ApiKey {

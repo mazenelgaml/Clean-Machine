@@ -6,21 +6,31 @@ import '../../../cutom_widgets/cutom_nav_bar.dart';
 import '../controller/home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialTabIndex; // تحديد التاب الافتراضي
+
+  const HomeScreen({super.key, this.initialTabIndex = 0}); // افتراضيًا يبدأ من التاب الأول
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentTabIndex = 0;
+  late int _currentTabIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTabIndex = widget.initialTabIndex; // تحديد التاب بناءً على القيمة الممررة
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomeController>(
       init: HomeController(),
       builder: (HomeController controller) {
         return DefaultTabController(
-          length: 3, // Number of tabs
+          length: 3,
+          initialIndex: _currentTabIndex, // يفتح التاب المحدد
           child: Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -52,11 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text:plan.tr),
+                  Tab(text: plan.tr),
                   Tab(text: waiting.tr),
                   Tab(text: reject.tr),
-
-
                 ],
               ),
             ),
@@ -65,22 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller.buildTabContent(plan.tr),
                 controller.buildTabContent(waiting.tr),
                 controller.buildTabContent(reject.tr),
-
-
               ],
             ),
-              bottomNavigationBar: CustomNavBar(currentTabIndex: 0,)
-
-
-
-            ,floatingActionButton: FloatingActionButton(
+            bottomNavigationBar: CustomNavBar(currentTabIndex: 0),
+            floatingActionButton: FloatingActionButton(
               onPressed: () {
                 setState(() {
-                  controller.isLoading=true;
+                  controller.isLoading = true;
                   controller.getUserPlan();
                   controller.getUserReject();
                   controller.getUserWaiting();
-
                 });
               },
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
