@@ -1,5 +1,5 @@
-import 'package:clean_machine/screens/profile/profileScreen/profile_screen.dart';
 import 'package:clean_machine/services/translation_key.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../cutom_widgets/cutom_nav_bar.dart';
@@ -77,14 +77,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             bottomNavigationBar: CustomNavBar(currentTabIndex: 0),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                setState(() {
-                  controller.isLoading = true;
-                  controller.getUserPlan();
-                  controller.getUserReject();
-                  controller.getUserWaiting();
-                });
-              },
+
+                onPressed: () async {
+                  var connectivityResult = await Connectivity().checkConnectivity();
+                  if (connectivityResult.last != ConnectivityResult.none) {
+                    setState(() {
+                      controller.isLoading = true;
+                      controller.getUserPlan();
+                      controller.getUserReject();
+                      controller.getUserWaiting();
+                    });
+                  } else {
+                    Get.snackbar("No Internet", "Please check your internet connection");
+                  }
+                },
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
               backgroundColor: Colors.blue,
               child: Icon(Icons.refresh, color: Colors.white),

@@ -42,7 +42,8 @@ class OrderDetailsController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    await initializeHive();;
+    await initializeHive();
+    await checkPermissions();
     await checkLocationPermission();
     await getCurrentLocation();
     await loadSavedData();
@@ -54,39 +55,26 @@ class OrderDetailsController extends GetxController {
     super.onClose();
   }
 
-  // Initialize Hive for local storage
   Future<void> initializeHive() async {
     final appDir = await getApplicationDocumentsDirectory();
     Hive.init(appDir.path);
-    print("Hive initialized at ${appDir.path}");
     await Hive.openBox('offline_data');
   }
 
-  // Load saved data from Hive
   Future<void> loadSavedData() async {
-    print("dd");
     var box = await Hive.openBox('offline_data');
     var savedData = box.values.where((data) => data["footerId"] == footerId).toList();
-    print(savedData);
     if (savedData.isNotEmpty) {
       var data = savedData.last;
-
-      // Restore location
       locationController.text = data["location"];
-
-      // Restore comments
       commentVisitedController.text = data["comment"];
       commentDamagedController.text = data["commentDamag"];
-
-      // Restore images (convert paths back to File objects)
       beforeCleanImages = (data["imageBefor"] as List<String>).map((path) => File(path)).toList();
       afterCleanImages = (data["imageAfter"] as List<String>).map((path) => File(path)).toList();
-
       update();
     }
   }
 
-  // Check location permission
   Future<void> checkLocationPermission() async {
     var status = await Permission.location.status;
     if (!status.isGranted) {
@@ -97,7 +85,6 @@ class OrderDetailsController extends GetxController {
     }
   }
 
-  // Get current location
   Future<void> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -133,81 +120,126 @@ class OrderDetailsController extends GetxController {
       latitude = position.latitude;
       longitude = position.longitude;
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        latitude,
-        longitude,
-      );
-
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
       Placemark place = placemarks.first;
       locationController.text = "${place.street}, ${place.locality}, ${place.country}";
       update();
     } catch (e) {
-      print("Error getting location: $e");
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         const SnackBar(content: Text("Failed to get location.")),
       );
     }
   }
 
-  // Pick image from camera
+  Future<File> compressImage(File file) async {
+    final filePath = file.absolute.path;
+    final lastIndex = filePath.lastIndexOf('.');
+    final newPath = filePath.substring(0, lastIndex) + '_compressed.jpg';
+
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      filePath,
+      newPath,
+      quality: 70,
+    );
+
+    return File(compressedFile!.path);
+  }
+
+  Future<void> checkPermissions() async {
+    // Request permissions
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.camera,
+      Permission.storage,
+    ].request();
+
+    // Handle location permission
+    if (statuses[Permission.location] == PermissionStatus.denied ||
+        statuses[Permission.location] == PermissionStatus.permanentlyDenied) {
+      Get.snackbar("Location Permission", "Location access is required.");
+    }
+
+    // Handle camera permission
+    if (statuses[Permission.camera] == PermissionStatus.denied ||
+        statuses[Permission.camera] == PermissionStatus.permanentlyDenied) {
+      Get.snackbar("Camera Permission", "Camera access is required to take pictures.");
+    }
+
+    // Handle storage permission
+    if (statuses[Permission.storage] == PermissionStatus.denied ||
+        statuses[Permission.storage] == PermissionStatus.permanentlyDenied) {
+      Get.snackbar("Storage Permission", "Storage access is required to save images.");
+    }
+
+    // If any permission is permanently denied, prompt to go to settings
+    if (statuses.values.any((status) => status == PermissionStatus.permanentlyDenied)) {
+      await Future.delayed(const Duration(seconds: 1));
+      Get.defaultDialog(
+        title: "Permission Required",
+        middleText: "Some permissions are permanently denied. Please enable them from app settings.",
+        textConfirm: "Open Settings",
+        textCancel: "Cancel",
+        confirmTextColor: Colors.white,
+        onConfirm: () {
+          openAppSettings();
+          Get.back();
+        },
+      );
+    }
+  }
+
+  // Change this method to allow taking a photo using the camera.
   Future<void> pickImageFromCamera(List<File> targetList) async {
     try {
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
-        targetList.add(File(pickedFile.path));
+        File originalFile = File(pickedFile.path);
+        File compressed = await compressImage(originalFile);
+        targetList.add(compressed);
         update();
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          const SnackBar(content: Text('Image captured and compressed successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          const SnackBar(content: Text('No image captured.')),
+        );
       }
     } catch (e) {
-      print("Error picking image: $e");
+      print('Error capturing/compressing image: $e');
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
     }
   }
 
-  // Remove image from list
+
   void removeImage(List<File> targetList, int index) {
     if (index >= 0 && index < targetList.length) {
       targetList.removeAt(index);
       update();
     }
   }
+
   Future<void> clearSavedData(String footerId) async {
     var box = await Hive.openBox('offline_data');
-
-    // طباعة البيانات الحالية لتأكيد الفهم
-    print("All data in offline_data box before deletion: ${box.toMap()}");
-
-    // البحث عن المفاتيح المرتبطة بـ footerId
     var keysToDelete = box.keys.where((key) {
       var data = box.get(key);
-      // تأكد من وجود footerId وتطابقه
       return data != null && data["footerId"] == footerId;
     }).toList();
 
-    // طباعة المفاتيح اللي هتتحذف
-    print("Keys to delete for footerId $footerId: $keysToDelete");
-
-    // حذف كل المفاتيح
     for (var key in keysToDelete) {
       await box.delete(key);
     }
-
-    // طباعة البيانات بعد الحذف
-    print("All data in offline_data box after deletion: ${box.toMap()}");
-
-    print("Deleted all saved data for footerId: $footerId.");
   }
 
-
-
-  // Post comment
-  Future<void> postComment(BuildContext context,String footerId) async {
+  Future<void> postComment(BuildContext context, String footerId) async {
     final diio.Dio dio = diio.Dio(
       diio.BaseOptions(
         baseUrl: EndPoint.baseUrl,
         validateStatus: (status) => status != null && status < 500,
       ),
     );
-
-
 
     try {
       final response = await dio.post(
@@ -223,26 +255,24 @@ class OrderDetailsController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // Clear the image lists
         beforeCleanImages.clear();
         afterCleanImages.clear();
-
-        // Clear the controllers
         locationController.clear();
         commentVisitedController.clear();
         commentDamagedController.clear();
         await clearSavedData(footerId);
         Get.delete<OrderDetailsController>();
-
-        Get.to(() => HomeScreen(initialTabIndex: 1));
+        Get.offAll(() => HomeScreen(initialTabIndex: 1));
         CoolAlert.show(
           context: context,
           type: CoolAlertType.success,
           title: "Submitted",
           text: "Order details submitted successfully.",
-
         );
-
+        HomeController c =HomeController();
+        c.getUserPlan();
+        c.getUserReject();
+        c.getUserWaiting();
       } else {
         print("Error: ${response.data}");
       }
@@ -253,19 +283,8 @@ class OrderDetailsController extends GetxController {
       update();
     }
   }
-  Future<File> compressImage(File file) async {
-    final filePath = file.absolute.path;
-    final lastIndex = filePath.lastIndexOf('.');
-    final newPath = filePath.substring(0, lastIndex) + '_compressed.jpg';
 
-    final compressedFile = await FlutterImageCompress.compressAndGetFile(
-      filePath, newPath,
-      quality: 70, // نسبة الضغط (كلما قلت زادت الجودة)
-    );
 
-    return File(compressedFile!.path);
-  }
-  // Save data locally in Hive
   Future<void> _saveDataLocally({
     required List<File> beforeImages,
     required List<File> afterImages,
@@ -286,42 +305,44 @@ class OrderDetailsController extends GetxController {
       "commentDamag": commentDamagedController.text.trim(),
       "CreateDateTime": DateTime.now().toIso8601String(),
     });
-    print("Data saved locally for footerId: $footerId.");
   }
+  // Future<bool> hasInternetConnection() async {
+  //   try {
+  //     final result = await InternetAddress.lookup('google.com');
+  //     return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  //   } catch (_) {
+  //     return false;
+  //   }
+  // }
 
-  // Sync data when online
   Future<void> syncDataWhenOnline() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult.last == ConnectivityResult.none) {
+    if (connectivityResult.last != ConnectivityResult.none) {
       final box = Hive.box('offline_data');
       final dataList = box.values.where((data) => data["footerId"] == footerId).toList();
 
       if (dataList.isNotEmpty) {
         final data = dataList.last;
-
         await postImageBeforeAndAfter(
           Get.context!,
           data["footerId"],
           data["bankAtmId"],
         );
-
-        // After syncing, clear the data from Hive
         await box.clear();
-        print("Offline data synced and removed.");
       }
     } else {
-      print('No internet connection. Data saved locally.');
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         const SnackBar(content: Text('No internet connection. Data saved locally.')),
       );
     }
   }
 
-  // Post images before and after cleaning
   Future<void> postImageBeforeAndAfter(BuildContext context, String footerId, String bankAtmId) async {
-    isLoading=true;
+    isLoading = true;
     update();
+
     String id = await Get.find<CacheHelper>().getData(key: "id");
+
     final dio = diio.Dio(
       diio.BaseOptions(
         baseUrl: EndPoint.baseUrl,
@@ -329,31 +350,23 @@ class OrderDetailsController extends GetxController {
       ),
     );
 
-    isLoading = true;
-    update();
-
     try {
       List<diio.MultipartFile> beforeImages = await Future.wait(
         beforeCleanImages.map((file) async {
           File compressedFile = await compressImage(file);
-          String fileName = basename(compressedFile.path);
-          return await diio.MultipartFile.fromFile(compressedFile.path, filename: fileName);
+          return await diio.MultipartFile.fromFile(compressedFile.path, filename: basename(compressedFile.path));
         }),
       );
 
       List<diio.MultipartFile> afterImages = await Future.wait(
         afterCleanImages.map((file) async {
           File compressedFile = await compressImage(file);
-          String fileName = basename(compressedFile.path);
-          return await diio.MultipartFile.fromFile(compressedFile.path, filename: fileName);
+          return await diio.MultipartFile.fromFile(compressedFile.path, filename: basename(compressedFile.path));
         }),
       );
 
       var connectivityResult = await Connectivity().checkConnectivity();
-      print(connectivityResult);
-      print(connectivityResult);
       if (connectivityResult.last == ConnectivityResult.none) {
-        print("mazen mazen");
         await _saveDataLocally(
           beforeImages: beforeCleanImages,
           afterImages: afterCleanImages,
@@ -366,9 +379,7 @@ class OrderDetailsController extends GetxController {
         ));
         return;
       }
-     print(footerId);
-      print(beforeImages);
-      print(afterImages);
+
       diio.FormData formData = diio.FormData.fromMap({
         "workPlanFooterId": footerId,
         "CreateUserId": id,
@@ -401,8 +412,10 @@ class OrderDetailsController extends GetxController {
         const SnackBar(content: Text('Error syncing data. Please try again later.')),
       );
     } finally {
-
+      isLoading = false;
+      update();
     }
   }
-  HomeController controller=HomeController();
+
+  HomeController controller = HomeController();
 }

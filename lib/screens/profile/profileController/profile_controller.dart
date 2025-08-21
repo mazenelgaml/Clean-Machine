@@ -1,9 +1,7 @@
 import 'package:clean_machine/services/end_points.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../models/get_user_data_model.dart';
 import '../../../services/localization_services.dart';
 import '../../../services/memory.dart';
@@ -111,6 +109,7 @@ class ProfileController extends GetxController{
     try {
       final response = await dio.get(
         "/api/ApplicationUsers/GetUserById/${id}",
+
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -119,7 +118,7 @@ class ProfileController extends GetxController{
       if (response.statusCode == 200) {
         GetUserDataModel userDataModel=GetUserDataModel.fromJson(response.data);
         userData=userDataModel;
-
+         print(id);
       } else {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
             SnackBar(content: Text('Error fetching user data')));

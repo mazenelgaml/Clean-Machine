@@ -1,10 +1,8 @@
-import 'package:clean_machine/models/get_token_model.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-
 import '../../../services/end_points.dart';
 import '../../../services/memory.dart';
 import '../../home/home_screen/home_screen.dart';

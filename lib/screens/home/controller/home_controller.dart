@@ -1,6 +1,14 @@
+import 'dart:io';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:system_info2/system_info2.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/get_all_plan_model.dart';
@@ -97,27 +105,150 @@ class HomeController extends GetxController {
   }
 
   // Handles tab changes in BottomNavigationBar
-  void onTabChanged(int index) {
+  void onTabChanged(int index) async{
     currentTabIndex = index;
     isLoading = true; // Show loading indicator
     update(); // Notify GetX to rebuild
 
     // Fetch data for the selected tab
-    if (currentTabIndex == 0) {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (currentTabIndex == 0&&connectivityResult.last != ConnectivityResult.none) {
       getUserPlan(); // Fetch all plans when the first tab is selected
-    } else if (currentTabIndex == 1) {
+    } else if (currentTabIndex == 1&&connectivityResult.last != ConnectivityResult.none) {
       getUserReject(); // Fetch rejected plans when the second tab is selected
+    }else if(currentTabIndex == 2&&connectivityResult.last != ConnectivityResult.none){
+      getUserReject();
     }
   }
+  // Future<bool> hasInternetConnection() async {
+  //   try {
+  //     final result = await InternetAddress.lookup('google.com');
+  //     return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  //   } catch (_) {
+  //     return false;
+  //   }
+  // }
+
 
   @override
   Future<void> onInit() async {
     super.onInit();
     await CacheHelper.init();
-    await getUserPlan();
-    await getUserReject();
-    await getUserWaiting(); // Initial fetch for the 'plan' tab data
+    await Hive.initFlutter(); // Initialize Hive
+
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult.last != ConnectivityResult.none) {
+      await getUserPlan(); // <-- await هنا ضروري
+    } else {
+      await Hive.openBox('plansBox');
+      final box = Hive.box('plansBox');
+
+      final List<dynamic>? allPlanRaw = box.get('allPlan');
+      final List<dynamic>? rejectPlanRaw = box.get('allRejectPlan');
+      final List<dynamic>? waitingPlanRaw = box.get('allWaitingPlan');
+
+      if (allPlanRaw != null) {
+        isLoading = true;
+        allPlan = allPlanRaw
+            .whereType<Map>()
+            .map((e) => GetAllPlansModel.fromJson(Map<String, dynamic>.from(
+            e.map((key, value) => MapEntry(key.toString(), value)))))
+            .toList();
+        isLoading = false;
+        update();
+      }
+
+      if (rejectPlanRaw != null) {
+        isLoading = true;
+        allRejectPlan = rejectPlanRaw
+            .whereType<Map>()
+            .map((e) => GetAllPlansModel.fromJson(Map<String, dynamic>.from(
+            e.map((key, value) => MapEntry(key.toString(), value)))))
+            .toList();
+        isLoading = false;
+        update();
+      }
+
+      if (waitingPlanRaw != null) {
+        isLoading = true;
+        allWaitingPlan = waitingPlanRaw
+            .whereType<Map>()
+            .map((e) => GetAllPlansModel.fromJson(Map<String, dynamic>.from(
+            e.map((key, value) => MapEntry(key.toString(), value)))))
+            .toList();
+        isLoading = false;
+        update();
+      }
+    }
+
+
+    await printDeviceInfo();
   }
+
+
+
+  Future<void> getDiskSpaceInfo() async {
+    const platform = MethodChannel('com.example.clean_machine/deviceinfo');
+    try {
+      final result = await platform.invokeMethod<Map>('getDiskSpace');
+      final total = result?['total'];
+      final free = result?['free'];
+      print('Total Disk Space: ${total ?? 'N/A'} MB');
+      print('Free Disk Space: ${free ?? 'N/A'} MB');
+    } on PlatformException catch (e) {
+      print("Failed to get disk space: ${e.message}");
+    }
+  }
+  Future<void> printDeviceInfo() async {
+    final deviceInfo = DeviceInfoPlugin();
+
+    print("------------------------------------------------------------");
+
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      print('Android Version: ${androidInfo.version.release}');
+      print('SDK: ${androidInfo.version.sdkInt}');
+      print('Brand: ${androidInfo.brand}');
+      print('Model: ${androidInfo.model}');
+      print('Manufacturer: ${androidInfo.manufacturer}');
+      print('Hardware: ${androidInfo.hardware}');
+      print('Product: ${androidInfo.product}');
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      print('iOS Version: ${iosInfo.systemVersion}');
+      print('Model: ${iosInfo.model}');
+      print('Name: ${iosInfo.name}');
+      print('System Name: ${iosInfo.systemName}');
+      print('Identifier: ${iosInfo.identifierForVendor}');
+    }
+
+    try {
+      int totalRam = SysInfo.getTotalPhysicalMemory() ~/ (1024 * 1024);
+      int freeRam = SysInfo.getFreePhysicalMemory() ~/ (1024 * 1024);
+      print('Total RAM: $totalRam MB');
+      print('Free RAM: $freeRam MB');
+    } catch (e) {
+      print('Failed to get RAM info: $e');
+    }
+    await  getDiskSpaceInfo();
+    print('Disk space info not available due to disk_space plugin issues.');
+  }
+
+
+  void refreshHomeData() async {
+    isLoading = true;
+    update();
+
+    // Example: Fetch the latest orders or data
+    await getUserPlan();
+    await getUserWaiting();
+    await getUserReject();// Replace this with your actual method
+
+    isLoading = false;
+    update();
+  }
+
 
   // Builds content for each tab
   Widget buildTabContent(String tabName) {
@@ -180,30 +311,43 @@ class HomeController extends GetxController {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                            orderNum.tr + ":" + "${plan.orderNumberFooter}",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Serial num: ${plan.atmserial}",
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w800),
-                          ),
-                          SizedBox(height: 8),
-                        ],
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              child: Text(
+                                orderNum.tr + ":" + "${plan.orderNumberFooter}",
+
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    overflow: TextOverflow.ellipsis,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Serial num: ${plan.atmserial}",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                            SizedBox(height: 8),
+                          ],
+                        ),
                       ),
-                      Container(
-                        width: 60,
-                        height: 60,
-                        child:Image(image: plan.imageUrl==null||plan.imageUrl==""?AssetImage("assets/images/atm-machine-3d-icon-png.png"):NetworkImage(plan.imageUrl),fit: BoxFit.fill,) ,
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          child: plan.imageUrl==null||plan.imageUrl==""?Image.asset("assets/images/atm-machine-3d-icon-png.png",fit: BoxFit.fill,):Image.network(plan.imageUrl,fit: BoxFit.fill,errorBuilder: (context, error, stackTrace) {
+                            return Image.asset("assets/images/atm-machine-3d-icon-png.png", fit: BoxFit.fill);
+                          },) ,
+                        ),
                       )
                     ],
                   ),
@@ -287,7 +431,9 @@ class HomeController extends GetxController {
       if (response.statusCode == 200) {
         List<GetAllPlansModel> plansList = List<GetAllPlansModel>.from(
             response.data.map((x) => GetAllPlansModel.fromJson(x)));
-        allPlan = plansList; // Assign the list of plans to the allPlan variable
+        allPlan = plansList;
+        final box = Hive.box('plansBox');
+        box.put('allPlan', response.data);// Assign the list of plans to the allPlan variable
       } else {
         ScaffoldMessenger.of(Get.context!)
             .showSnackBar(SnackBar(content: Text('Error fetching user data')));
@@ -317,7 +463,7 @@ class HomeController extends GetxController {
 
     try {
       final response = await dio.get(
-        "/api/Reports/GetAllPlanRejected?UserId==$id",
+        "/api/Reports/GetAllPlanRejected?UserId=$id",
         options: Options(headers: {
           "Content-Type": "application/json",
         }),
@@ -327,13 +473,15 @@ class HomeController extends GetxController {
         List<GetAllPlansModel> plansList = List<GetAllPlansModel>.from(
             response.data.map((x) => GetAllPlansModel.fromJson(x)));
         allRejectPlan =
-            plansList; // Assign the list of rejected plans to allRejectPlan
+            plansList;
+        final box = Hive.box('plansBox');
+        box.put('allRejectPlan', response.data);// Assign the list of rejected plans to allRejectPlan
       } else {
         ScaffoldMessenger.of(Get.context!)
             .showSnackBar(SnackBar(content: Text('Error fetching user data')));
       }
     } catch (e) {
-      print(e);
+
       ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
           content: Text('Error occurred while connecting to the Server')));
     } finally {
@@ -366,13 +514,15 @@ class HomeController extends GetxController {
         List<GetAllPlansModel> plansList = List<GetAllPlansModel>.from(
             response.data.map((x) => GetAllPlansModel.fromJson(x)));
         allWaitingPlan =
-            plansList; // Assign the list of rejected plans to allRejectPlan
+            plansList;
+        final box = Hive.box('plansBox');
+        box.put('allWaitingPlan', response.data);// Assign the list of rejected plans to allRejectPlan
       } else {
         ScaffoldMessenger.of(Get.context!)
             .showSnackBar(SnackBar(content: Text('Error fetching user data')));
       }
     } catch (e) {
-      print(e);
+
       ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
           content: Text('Error occurred while connecting to the Server')));
     } finally {

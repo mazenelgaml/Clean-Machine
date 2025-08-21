@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart';
 import 'screens/splash/splash_screen/splash_screen.dart';
 import 'services/localization_services.dart';
@@ -19,7 +21,9 @@ void main() async {
   // Set the app language based on the device language
   final deviceLocale = await _getDeviceLocale();
   final locale = deviceLocale == 'ar' ? Locale('ar', 'EG') : Locale('en', 'US');
-
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('plansBox');
   runApp(MyApp(initialLocale: locale));
 }
 

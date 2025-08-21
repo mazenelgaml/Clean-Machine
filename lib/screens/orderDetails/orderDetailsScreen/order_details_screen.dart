@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:clean_machine/screens/orderDetails/orderDetailsController/order_details_controller.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-
 import '../../../services/translation_key.dart';
+import '../../home/home_screen/home_screen.dart';
 
 class DynamicExpandableContainer extends StatefulWidget {
   final int orderNum;
@@ -153,12 +153,20 @@ class _DynamicExpandableContainerState
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.black,
-              leading: BackButton(
-                color: Colors.white,
-                onPressed: () {
-                  Get.back();
-                },
-              ),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () async {
+              var connectivityResult = await (Connectivity().checkConnectivity());
+              if (connectivityResult.last != ConnectivityResult.none) {
+
+                Get.to(()=>HomeScreen(initialTabIndex: 0,)); // You implement this
+              }else{
+                Get.to(()=>HomeScreen(initialTabIndex: 0,));
+              }
+               // Then navigate back in both cases
+            },
+          ),
+
               title: Text(
                 orderDetails.tr,
                 style: TextStyle(
